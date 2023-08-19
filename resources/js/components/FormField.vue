@@ -5,11 +5,12 @@
   >
     <template #field>
       <vue-select
+          dir="rtl"
         :id="field.name"
         v-model="value"
         class="w-full form-control form-input form-input-bordered"
         :class="errorClasses"
-        :placeholder="field.name"
+        :placeholder="field.placeholder"
         :options="availableOptions"
         :label="labelKey"
         :multiple="field.multiple"
@@ -17,20 +18,27 @@
         :filterable="filterable"
         @search="inputChange"
         @input="inputSelected"
-      />
+      >
+        <template #no-options="{ search, searching, loading }">
+          This is the no options slot.
+        </template>
+        <template #option="{label}">
+          <em>{{ label }}</em>
+        </template>
+      </vue-select>
     </template>
   </default-field>
 </template>
 
 <script>
-import { FormField, HandlesValidationErrors } from 'laravel-nova'
+import {FormField, HandlesValidationErrors} from 'laravel-nova'
 import VueSelect from 'vue-select';
 import 'vue-select/dist/vue-select.css';
 import _ from 'lodash';
-import { isArray } from 'util';
+import {isArray} from 'util';
 
 export default {
-	
+
 	components: {
 		VueSelect,
 	},
@@ -61,7 +69,7 @@ export default {
 
 			// If component is inside a flexible, key is prefixed with an id
 			if( currentField.indexOf('__') ) {
-				targetField = currentField.substr(0, currentField.indexOf('__')) + '__' + targetField; 
+				targetField = currentField.substr(0, currentField.indexOf('__')) + '__' + targetField;
 			}
 
 			//  Find the component the parent value references
@@ -122,7 +130,7 @@ export default {
 
 		/*
 		* Load initial Options
-		*/ 
+		*/
 		loadInitialOptions (value) {
 			let url = this.buildParamString(null, value);
 
@@ -152,16 +160,17 @@ export default {
 
 		/*
 		* Dynamic search with the input value
-		*/ 
+		*/
 		search: window._.debounce((loading, searchVal, vm) => {
 			let url = vm.buildParamString(searchVal)
 			window.Nova.request().get( url ).then(({data}) => {
+        console.log(data);
 				vm.options = data;
 				loading(false);
 			});
 		}, 350),
 
-		
+
 		/*
 		* When multiselect input changes, determine if ready to query
 		*/
